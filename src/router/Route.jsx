@@ -17,15 +17,16 @@ import EditTermCondition from "../dashboard/menu/termsCondition/EditTermConditio
 import ErrorPage from "./ErrorPage";
 import About from "../dashboard/menu/about/About";
 import EditAbout from "../dashboard/menu/about/EditAbout";
-import Subscription from "../dashboard/menu/subscription/Subscription";
+import WithdrawRequest from "../dashboard/menu/subscription/WithdrawRequest";
 import Addsubscripton from "../dashboard/menu/subscription/Addsubscripton";
 import Editsubscription from "../dashboard/menu/subscription/Editsubscription"; 
 import Settings from "../dashboard/menu/sidebarMenu/Settings";
-import AdminsPage from "../dashboard/menu/sidebarMenu/Admin";
-import LabTest from "../dashboard/menu/sidebarMenu/LabTest";
+import AdminsPage from "../dashboard/menu/sidebarMenu/Brand";
+import LabTest from "../dashboard/menu/sidebarMenu/CampaignList";
 import UserManagement from "../dashboard/menu/sidebarMenu/User";
 import AddLab from "../dashboard/menu/sidebarMenu/AddLab";
 import InfluencerListPage from "../dashboard/menu/sidebarMenu/User";
+import CampaignListPage from "../dashboard/menu/sidebarMenu/CampaignList";
 
 
 export const router = createBrowserRouter([
@@ -76,8 +77,8 @@ export const router = createBrowserRouter([
                 element: <InfluencerListPage />
             },
             {
-                path:"labtest",
-                element: <LabTest />
+                path:"campaigns",
+                element: <CampaignListPage />
             },
             {
                 path:"labtest/addlabtest",
@@ -113,8 +114,8 @@ export const router = createBrowserRouter([
                 element:<EditAbout />
             },
             {
-                path:'pricing',
-                element: <Subscription />
+                path:'withdraw-request',
+                element: <WithdrawRequest />
             },
             {
                 path: 'subscription/addsubscription',

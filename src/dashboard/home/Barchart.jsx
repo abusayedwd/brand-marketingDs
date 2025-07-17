@@ -1,90 +1,30 @@
-// import React from 'react';
-// import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-// import { Select } from 'antd';
-
-// const data = [
-//   { month: 'Jan', pv: 2400, amt: 2400 },
-//   { month: 'Feb', pv: 1398, amt: 2210 },
-//   { month: 'Mar', uv: 2000, pv: 9800, amt: 2290 },
-//   { month: 'Apr', uv: 2780, pv: 3908, amt: 2000 },
-//   { month: 'May', uv: 1890, pv: 4800, amt: 2181 },
-//   { month: 'Jun', uv: 2390, pv: 3800, amt: 2500 },
-//   { month: 'Jul', uv: 3490, pv: 5300, amt: 2100 },
-//   { month: 'Aug', uv: 3490, pv: 8300, amt: 2100 },
-//   { month: 'Sep', uv: 3490, pv: 7300, amt: 2100 },
-//   { month: 'Oct', uv: 3490, pv: 4300, amt: 2100 },
-//   { month: 'Nov', uv: 3490, pv: 9300, amt: 2100 },  // Fixed "Nev" to "Nov"
-//   { month: 'Dec', uv: 2490, pv: 7300, amt: 2100 },
-// ];
-
-// const CustomTooltip = ({ active, payload, label }) => {
-//   if (active && payload && payload.length) {
-//     return (
-//       <div className="custom-tooltip bg-white p-2 border border-gray-300 rounded">
-//         <p className="label font-medium">{`${label} : ${payload[0].value}`}</p>
-//         <p className="desc text-sm text-gray-600">Additional details can be shown here.</p>
-//       </div>
-//     );
-//   }
-
-//   return null;
-// };
-
-// const handleChange = (value) => {
-//   console.log(`selected ${value}`);
-// };
-
-// const Barchart = () => {
-//   return (
-//     <div>
-//       <div className="flex justify-between items-center pt-2 ">
-//       <h1 className="font-medium text-header">Earning</h1>
-//         <Select
-//           defaultValue="2024"
-//           className="border-none"
-//           style={{
-//             width: 120,
-//             border: 'none',
-//           }}
-//           onChange={handleChange}
-//           options={[
-//             { value: '2024', label: '2024' },
-//             { value: '2023', label: '2023' },
-//             { value: '2022', label: '2022' },
-//           ]}
-//         />
-//       </div>
-
-//       <ResponsiveContainer width="100%" height={280}>
-//         <BarChart
-//           data={data}
-//           margin={{
-//             top: 20,
-//             right: 30,
-//             left: 20,
-//             bottom: 5,
-//           }}
-//         >
-//           <CartesianGrid strokeDasharray="" />
-//           <XAxis dataKey="month" /> {/* Fixed dataKey to 'month' */}
-//           <YAxis />
-//           <Tooltip content={<CustomTooltip />} />
-//           <Bar dataKey="pv" barSize={30} fill="#193664" radius={[4, 4, 0, 0]} />
-//         </BarChart>
-//       </ResponsiveContainer>
-//     </div>
-//   );
-// };
-
-// export default Barchart;
+ 
 
 
 import React, { useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useAdminEarningChartQuery } from '../../redux/features/earningStatus/adminEarningChart';
+import { useAdminPaymentToInfluencerQuery } from '../../redux/features/earningStatus/adminPaymentToInfluencer';
 
 const Barchart = () => {
   const [selectedPaymentYear, setSelectedPaymentYear] = useState('2025');
-  const [selectedIncomeYear, setSelectedIncomeYear] = useState('2024');
+  const [selectedIncomeYear, setSelectedIncomeYear] = useState('2025');
+
+ const {data : adminEarningchartData} = useAdminEarningChartQuery(selectedIncomeYear)
+ const {data : adminPaymentchartData} = useAdminPaymentToInfluencerQuery(selectedPaymentYear)
+
+  
+ console.log(adminPaymentchartData)
+
+ const formattedAreaChartData = adminEarningchartData?.data?.attributes?.map((item) => ({
+    month: item.month,
+    earning: parseFloat(item.totalEarnings),  // Assuming totalEarnings is a string, converting it to number
+  })) || [];
+
+ const formattedPaymentChartData = adminPaymentchartData?.data?.attributes?.map((item) => ({
+    month: item.month,
+    earning: parseFloat(item.totalEarnings),  // Assuming totalEarnings is a string, converting it to number
+  })) || [];
 
   // Sample data for different years
   const yearlyData = {
@@ -132,6 +72,8 @@ const Barchart = () => {
     ]
   };
 
+
+
   const currentPaymentData = yearlyData[selectedPaymentYear];
   const currentIncomeData = yearlyData[selectedIncomeYear];
 
@@ -164,14 +106,17 @@ const Barchart = () => {
               onChange={(e) => setSelectedPaymentYear(e.target.value)}
               className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
               <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+              <option value="2030">2030</option>
             </select>
           </div>
           
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={currentPaymentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <AreaChart data={formattedPaymentChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="month" 
@@ -187,7 +132,7 @@ const Barchart = () => {
               <Tooltip content={(props) => <CustomTooltip {...props} year={selectedPaymentYear} />} />
               <Area 
                 type="monotone" 
-                dataKey="payment" 
+                dataKey="earning" 
                 stroke="#8B5CF6" 
                 fill="#8B5CF6"
                 fillOpacity={0.6}
@@ -206,14 +151,17 @@ const Barchart = () => {
               onChange={(e) => setSelectedIncomeYear(e.target.value)}
               className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
               <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+              <option value="2030">2030</option>
             </select>
           </div>
           
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={currentIncomeData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <AreaChart data={formattedAreaChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="month" 
@@ -229,7 +177,7 @@ const Barchart = () => {
               <Tooltip content={(props) => <CustomTooltip {...props} year={selectedIncomeYear} />} />
               <Area 
                 type="monotone" 
-                dataKey="income" 
+                dataKey="earning" 
                 stroke="#10B981" 
                 fill="#10B981"
                 fillOpacity={0.6}

@@ -1,54 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Modal } from 'antd';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFacebook, faInstagram, faTwitter, faSnapchat } from '@fortawesome/free-brands-svg-icons';
  
+ 
+import { useContentCreatorQuery } from '../../../redux/features/users/contentCreator';
+import { FacebookOutlined, InstagramOutlined, TwitterOutlined } from '@ant-design/icons';
+import { TiSocialPinterest } from 'react-icons/ti';
 
-// Data
-const influencerData = [
-  {
-    key: '1',
-    fullName: 'Bipul',
-    userName: 'daedrrr',
-    email: 'abu@gmail.com',
-    platforms: [
-      { platform: 'Facebook', followers: '324k', url: 'https://www.facebook.com/', icon: faFacebook },
-      { platform: 'Instagram', followers: '43k', url: 'https://www.instagram.com/', icon: faInstagram },
-      { platform: 'Snapchat', followers: '33k', url: 'https://www.snapchat.com/', icon: faSnapchat },
-    ],
-    bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    subscription: 'Abonnement Starter',
-    planPrice: '29.99 EUR',
-    planDuration: '1 month',
-    previousExperience: 'none',
-    interests: ['Fashion & Style', 'Gaming', 'Food & Cooking'],
-  },
-  {
-    key: '2',
-    fullName: 'Testing Influencer',
-    userName: '',
-    email: 'influencer@gmail.com',
-    platforms: [
-      { platform: 'Facebook', followers: '34k', url: 'https://www.facebook.com/', icon: faFacebook },
-      { platform: 'Instagram', followers: '36k', url: 'https://www.instagram.com/', icon: faInstagram },
-      { platform: 'Twitter', followers: '323k', url: 'https://www.twitter.com/', icon: faTwitter },
-    ],
-    bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    subscription: 'Abonnement Starter',
-    planPrice: '29.99 EUR',
-    planDuration: '1 month',
-    previousExperience: 'none',
-    interests: ['Fashion & Style', 'Beauty & Cosmetics', 'Gaming'],
-  },
-];
-
-// Modal View for displaying detailed information
-const InfluencerListPage = () => {
+const ContentCreatorListPage = () => {
+  const { data: contentCreator, isLoading, error } = useContentCreatorQuery(); // Fetching the data
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedInfluencer, setSelectedInfluencer] = useState(null);
-  
- const {data:}
 
+  useEffect(() => {
+    console.log('Fetched Content Creators:', contentCreator);
+  }, [contentCreator]);
+
+  // Show details modal
   const showModal = (influencer) => {
     setSelectedInfluencer(influencer);
     setIsModalVisible(true);
@@ -59,11 +26,16 @@ const InfluencerListPage = () => {
     setSelectedInfluencer(null);
   };
 
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading content creators</div>;
+
+  // Columns for the Ant Design Table
   const columns = [
     {
       title: 'S. No',
       dataIndex: 'key',
       key: 'key',
+       render: (_, __, index) => index + 1, 
     },
     {
       title: 'Name',
@@ -76,33 +48,48 @@ const InfluencerListPage = () => {
       key: 'email',
     },
     {
+      title: 'PhoneNumber',
+      dataIndex: 'phoneNumber',
+      key: 'phoneNumber',
+    },
+    {
       title: 'Platforms',
-      dataIndex: 'platforms',
-      key: 'platforms',
-      render: (platforms) => (
+      dataIndex: 'socialMedia',
+      key: 'socialMedia',
+      render: (socialMedia) => (
         <div className="flex space-x-2">
-          {platforms.map((platform, index) => (
+          {socialMedia.map((platform, index) => (
             <a key={index} href={platform.url} target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={platform.icon} className="h-6 w-6 text-blue-600" />
+              {/* Displaying social media icons based on the platform */}
+               {platform.platform === 'Facebook' && <FacebookOutlined className="h-8 w-8 text-blue-600" />}
+          
+          {/* Instagram Icon */}
+          {platform.platform === 'Instagram' && <InstagramOutlined className="h-8 w-8 text-pink-600" />}
+          
+          {/* Twitter Icon */}
+          {platform.platform === 'Twitter' && <TwitterOutlined className="h-8 w-8 text-blue-400" />}
+          
+          {/* Snapchat Icon */}
+          {platform.platform === 'Snapchat' && <TiSocialPinterest className="h-8 w-8 text-yellow-500" />}
+          
+          {/* TikTok Icon */}
+          {platform.platform === 'TikTok' && <FaTiktok className="h-8 w-8 text-black" />}
+          
+          {/* YouTube Icon */}
+          {platform.platform === 'YouTube' && <FaYoutube className="h-8 w-8 text-red-600" />}
+        
             </a>
           ))}
         </div>
       ),
     },
     {
-      title: 'Subscription',
-      dataIndex: 'subscription',
+      title: 'Subscription Plan',
+      dataIndex: 'subscriptionId.planName',
       key: 'subscription',
-    },
-    {
-      title: 'Price',
-      dataIndex: 'planPrice',
-      key: 'planPrice',
-    },
-    {
-      title: 'Duration',
-      dataIndex: 'planDuration',
-      key: 'planDuration',
+      render: (_,subscription) => (
+        <p>{subscription?.subscriptionId.planName}</p>
+      )
     },
     {
       title: 'Action',
@@ -117,10 +104,15 @@ const InfluencerListPage = () => {
     },
   ];
 
+  // Displaying the content creators in a table
   return (
-    <div className="max-w-6xl mx-auto mt-8">
-      <h1 className="text-3xl font-semibold mb-4">All Influencers List</h1>
-      <Table columns={columns} dataSource={influencerData} />
+    <div className=" mx-auto mt-8">
+      <h1 className="text-3xl font-semibold mb-4">All Content Creators List</h1>
+      <Table
+        columns={columns}
+        dataSource={contentCreator?.data?.attributes?.results || []} // Safely access data
+        rowKey="id" // Using 'id' as the unique key for each row
+      />
 
       {/* Modal to View Influencer Details */}
       <Modal
@@ -135,19 +127,34 @@ const InfluencerListPage = () => {
             <p><strong>Name:</strong> {selectedInfluencer.fullName}</p>
             <p><strong>Email:</strong> {selectedInfluencer.email}</p>
             <p><strong>Bio:</strong> {selectedInfluencer.bio}</p>
-            <p><strong>Subscription:</strong> {selectedInfluencer.subscription}</p>
-            <p><strong>Price:</strong> {selectedInfluencer.planPrice}</p>
-            <p><strong>Duration:</strong> {selectedInfluencer.planDuration}</p>
+            <p><strong>Subscription:</strong> {selectedInfluencer.subscriptionId.planName}</p>
+            <p><strong>Price:</strong> {selectedInfluencer.subscriptionId.price} {selectedInfluencer.subscriptionId.currency}</p>
+            <p><strong>Duration:</strong> {selectedInfluencer.subscriptionId.duration}</p>
             <p><strong>Previous Experience:</strong> {selectedInfluencer.previousExperience}</p>
             <p><strong>Interests:</strong> {selectedInfluencer.interests.join(', ')}</p>
             <div>
               <strong>Platforms:</strong>
               <div className="flex space-x-2 mt-2">
-                {selectedInfluencer.platforms.map((platform, index) => (
+                {selectedInfluencer.socialMedia.map((platform, index) => (
                   <a key={index} href={platform.url} target="_blank" rel="noopener noreferrer">
-                    <FontAwesomeIcon icon={platform.icon} className="h-8 w-8 text-blue-600" />
-                    <span className="ml-2">{platform.platform} ({platform.followers})</span>
-                  </a>
+                    {/* Displaying social media icons for the platform */}
+                     {platform.platform === 'Facebook' && <FacebookOutlined className="h-8 w-8 text-blue-600" />}
+          
+          {/* Instagram Icon */}
+          {platform.platform === 'Instagram' && <InstagramOutlined className="h-8 w-8 text-pink-600" />}
+          
+          {/* Twitter Icon */}
+          {platform.platform === 'Twitter' && <TwitterOutlined className="h-8 w-8 text-blue-400" />}
+          
+          {/* Snapchat Icon */}
+          {platform.platform === 'Snapchat' && <TiSocialPinterest className="h-8 w-8 text-yellow-500" />}
+          
+          {/* TikTok Icon */}
+          {platform.platform === 'TikTok' && <FaTiktok className="h-8 w-8 text-black" />}
+          
+          {/* YouTube Icon */}
+          {platform.platform === 'YouTube' && <FaYoutube className="h-8 w-8 text-red-600" />}
+        </a>
                 ))}
               </div>
             </div>
@@ -158,4 +165,4 @@ const InfluencerListPage = () => {
   );
 };
 
-export default InfluencerListPage;
+export default ContentCreatorListPage;

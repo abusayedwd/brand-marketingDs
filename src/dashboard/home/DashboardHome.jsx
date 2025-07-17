@@ -12,7 +12,7 @@ const DashboardHome = () => {
         <div>
             <Card> </Card>
             <Barchart />
-            <Transaction />
+            {/* <Transaction /> */}
         </div>
     );
 };

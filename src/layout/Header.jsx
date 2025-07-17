@@ -9,7 +9,10 @@ import { IoIosNotificationsOutline } from "react-icons/io";
 import './header.css' 
 import Swal from "sweetalert2";
 import { useState } from "react";
-  
+import { useLogedUserQuery } from "../redux/features/users/logedUser";
+import url from "./../redux/api/baseUrl"; 
+import { useChangPasswordMutation } from "../redux/features/auth/changePassword";
+import toast, { Toaster } from "react-hot-toast";
  
  
  
@@ -17,8 +20,12 @@ import { useState } from "react";
 
 const Header = () => {
 
- 
+ const {data: adminm} = useLogedUserQuery();
+ const admin = adminm?.data?.attributes;
+
   const navigate = useNavigate();
+
+
  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -26,6 +33,8 @@ const Header = () => {
   const openModal = () => {
     setIsModalOpen(true);
   };
+
+  const [passwordChange] = useChangPasswordMutation()
 
   const handleLogOut = () => {
     Swal.fire({
@@ -57,21 +66,21 @@ const Header = () => {
     const { confirmPassword, ...ChangePassword } = values;
     console.log("Form values: ", ChangePassword);
  
-  // try{
-  //   const res = await passwordChange(ChangePassword).unwrap();
-  //   if(res?.code == 200){
-  //     setIsModalOpen(false)
-  //     toast.success(res?.message)
-  //   }
-  //   setTimeout(() => { 
-  //     navigate('/dashboard/home')
-  //   }, 1000);
+  try{
+    const res = await passwordChange(ChangePassword).unwrap();
+    if(res?.code == 200){
+      setIsModalOpen(false)
+      toast.success(res?.message)
+    }
+    setTimeout(() => { 
+      navigate('/dashboard/home')
+    }, 1000);
     
-  // }catch(error){
-  //   console.log(error.data);
-  //   setError(error?.data?.message)
+  }catch(error){
+    console.log(error.data);
+    setError(error?.data?.message)
     
-  // }
+  }
 };
  
 
@@ -97,39 +106,20 @@ const menu = (
 
   return (
     <div className=" flex justify-between items-center shadow-xl mb-[24px] p-[16px] rounded-md !bg-primaryBg"> 
-    {/* <Toaster /> */}
+    <Toaster />
      <div className="text-white">
-      <p className="text-header text-whiteText font-medium">Webcome !</p>
+      <p className="text-header text-whiteText font-medium">Welcome !</p>
       {/* <h1>{profile?.data?.attributes?.name}</h1> */}
-      <h1 className="text-whiteText">{"absayed"}</h1>
+      <h1 className="text-whiteText">{admin?.fullName}</h1>
      </div>
 
-      <div className="flex gap-5">
-        {/* <Dropdown overlay={menu} placement="bottomRight" arrow> */}
-        <div
-          onClick={(e) => navigate("/dashboard/notification")}
-          className="relative flex items-center"
-        >
-          <Badge style={{ backgroundColor: "red", marginTop:'10px', marginRight:'5px' }} count={2}>
-            <IoIosNotificationsOutline
-              style={{ cursor: "pointer" }}
-              className={` bg-primary w-[52px] h-[52px] text-[#Ffffffff] border-2 border-[#e7e0e0] rounded-full p-2 `}
-            />
-          </Badge>
-        </div>
-        {/* </Dropdown> */}
-        {/* <div
-          onClick={() => navigate("/dashboard/profile")}
-          className="flex items-center cursor-pointer mr-[30px] bg-primary text-white rounded-full p-1"
-        >
-          <FaRegUser className="text-[#Ffff] border-2 border-[#Fffff] rounded-full p-2 w-[52px] h-[52px]" />
-        </div> */}
+      <div className="flex gap-5"> 
         <div>
         <Dropdown className="px-2" overlay={menu} trigger={['click']} onVisibleChange={handleMenuVisibility}>
     <a className="flex items-center text-white cursor-pointer text-whiteText">
-      <Avatar src={'https://randomuser.me/api/portraits/men/57.jpg'} className="mr-2 h-[52px] w-[52px]" />
+      <Avatar src={url + admin?.image?.url} className="mr-2 h-[52px] w-[52px]" />
       {/* <Avatar src={url + profile?.data?.attributes?.image} className="mr-2 h-[52px] w-[52px]" /> */}
-      AbSayed <DownOutlined className="ml-1" />
+      {admin?.fullName} <DownOutlined className="ml-1" />
     </a>
   </Dropdown>
         </div>

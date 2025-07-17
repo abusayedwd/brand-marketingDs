@@ -1,5 +1,5 @@
 {
-  "name": "ferty-dashboard",
+  "name": "influenceradmin-dashboard",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.6.1",
     "@reduxjs/toolkit": "^2.2.8",
     "antd": "^5.20.3",
     "jodit-react": "^4.1.2",

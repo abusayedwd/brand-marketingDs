@@ -1,15 +1,16 @@
+
 import { apiSlice } from "../../api/apiSlice";
 
-const changePassword = apiSlice.injectEndpoints({
+const changPassword = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
-        changePassword: builder.mutation({
+        changPassword : builder.mutation({
             query: (data) => ({
                 url: `/auth/change-password`,
                 method: "POST",
-                body: data
+                body:  data
             })
         })
     })
 })
 
-  export const {useChangePasswordMutation} = changePassword;
+export const {useChangPasswordMutation} = changPassword;

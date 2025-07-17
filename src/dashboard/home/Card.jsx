@@ -1,50 +1,68 @@
 import React from 'react';
 import { Users, UserCheck, DollarSign, TrendingUp } from 'lucide-react';
+import { useAdminEarningQuery } from '../../redux/features/earningStatus/adminEarning';
 
 const Card = () => {
+
+ const {data: status} = useAdminEarningQuery();
+//  console.log(status?.data?.attributes)
+  const value = status?.data?.attributes;
+
+
+
+
   const statusData = [
     {
-      title: "Total Influencer",
-      value: "5000+",
+      title: "My Total Earning from Subscription",
+      value: value?.totalEarnAdmin,
       icon: Users,
       iconColor: "text-blue-500",
       iconBg: "bg-blue-50"
     },
     {
-      title: "Total Client",
-      value: "5000+",
+      title: "Total Content Creator",
+      value: value?.influencers,
+      icon: Users,
+      iconColor: "text-blue-500",
+      iconBg: "bg-blue-50"
+    },
+    {
+      title: "Total Brand",
+      value: value?.brands,
       icon: UserCheck,
       iconColor: "text-blue-500",
       iconBg: "bg-blue-50"
     },
-    {
-      title: "Total Payment to Influencer",
-      value: "10,000",
-      icon: DollarSign,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
-    },
-    {
-      title: "Total Payment to Influencer",
-      value: "10,000",
-      icon: DollarSign,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
-    },
-    {
-      title: "Total Payment to Influencer",
-      value: "10,000",
-      icon: DollarSign,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
-    },
-    {
-      title: "Total Income from Client",
-      value: "100",
+     {
+      title: "Total Campaign",
+      value: value?.campaigns,
       icon: TrendingUp,
       iconColor: "text-blue-500",
       iconBg: "bg-blue-50"
-    }
+    },
+    {
+      title: "Total payment from campaign",
+      value: value?.campaignPaymentTotal,
+      icon: DollarSign,
+      iconColor: "text-blue-500",
+      iconBg: "bg-blue-50"
+    },
+    {
+      title: "Total Payment to Influencer",
+      value:  value?.withdrawPayment,
+      icon: DollarSign,
+      iconColor: "text-blue-500",
+      iconBg: "bg-blue-50"
+    },
+    
+    {
+      title: "Current Balance Campaign Payment",
+      value: value?.currentBalance,
+      icon: DollarSign,
+      iconColor: "text-blue-500",
+      iconBg: "bg-blue-50"
+    },
+   
   ];
 
   return (

@@ -6,41 +6,36 @@ import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { LuImagePlus } from "react-icons/lu";
 import "react-phone-number-input/style.css";
 import defaultUserImage from "../../../../public/image/randomuser.jpg";
- 
- 
- 
+import { useLogedUserQuery } from "../../../redux/features/users/logedUser";
+import url from "../../../redux/api/baseUrl";
+import toast, { Toaster } from "react-hot-toast";
+import { useUpdateAdminMutation } from "../../../redux/features/users/updateAdmin";
 
-const EditProfiel = () => {
+const EditProfile = () => {
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fileList, setFileList] = useState([]);
-  
-  
- 
-  const [imageUrl, setImageUrl] = useState();
- 
-//  console.log(profile?.data?.attributes);
- 
-//  const initialValues = {
-//   name: profile?.data?.attributes?.name ||'',
-//   email: profile?.data?.attributes?.email ||'',
-//   phoneNumber: profile?.data?.attributes?.phoneNumber ||'',
-// };
+  const [imageUrl, setImageUrl] = useState(defaultUserImage);
+  const { data: profile, isLoading } = useLogedUserQuery();
+  const id = profile?.data?.attributes?.id;
+  const [updateProfile] = useUpdateAdminMutation();
 
-// useEffect(() => {
-//   if (profile?.data?.attributes) {
-//     setPhoneNumber(profile.data.attributes.phoneNumber || '');
-//     const existingImageUrl = url + profile?.data?.attributes?.image;
-//     if (existingImageUrl) {
-//       setImageUrl(existingImageUrl);
-//     }
-//     initialValues.fullName = profile.data.attributes.fullName || '';
-//     initialValues.email = profile.data.attributes.email || '';
-//   }
-// }, [profile]);
+  // Set initial values for form fields
+  const initialValues = {
+    name: profile?.data?.attributes?.fullName || '',
+    email: profile?.data?.attributes?.email || '',
+    phoneNumber: profile?.data?.attributes?.phoneNumber || '',
+  };
 
-
-
+  useEffect(() => {
+    if (profile?.data?.attributes) {
+      setPhoneNumber(profile?.data?.attributes.phoneNumber || '');
+      const existingImageUrl = url + profile?.data?.attributes?.image?.url;
+      if (existingImageUrl) {
+        setImageUrl(existingImageUrl);
+      }
+    }
+  }, [profile]);
 
   const handleUploadChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
@@ -50,41 +45,37 @@ const EditProfiel = () => {
       reader.onload = () => setImageUrl(reader.result);
     }
   };
-//  console.log("fileeeeeeeeeeeeeeeeeeeee", imageUrl);
-//  console.log(fileList, phoneNumber);
- 
- 
+
   const handleUpdateProfile = async (values) => {
-    console.log(values); 
-    
-    
-    // const formData = new FormData();
-    // formData.append("name", values?.name); 
-    // formData.append("phoneNumber", phoneNumber);
-    // if (fileList[0]?.originFileObj) {
-    //   formData.append("image", fileList[0].originFileObj);
-    //   // formData.append("image", imageUrl);
-    // }
-    // try{
-    //   const res = await updateProfile(formData).unwrap();
-    //   console.log(res);
-    //   if(res?.code === 200){
-    //     toast.success(res?.message)
-    //   }
-    //   setTimeout(() => {
-    //     navigate('/dashboard/profile')
-    //   }, 1000);
-      
-    // }catch(error){
-    //   console.log(error?.data);
-       
-    // }
-     
+    const formData = new FormData();
+    formData.append("fullName", values?.name);
+    formData.append("phoneNumber", phoneNumber);
+    if (fileList[0]?.originFileObj) {
+      formData.append("image", fileList[0].originFileObj);
+    }
+
+    console.log(values?.name, phoneNumber, fileList)
+
+    try {
+      const res = await updateProfile({ formData, id }).unwrap();
+      if (res?.code === 200) {
+        toast.success(res?.message);
+        setTimeout(() => {
+          navigate('/dashboard/profile');
+        }, 1000);
+      }
+    } catch (error) {
+      console.log(error?.data);
+    }
   };
 
+  if (isLoading || !profile?.data?.attributes) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="">
-      {/* <Toaster /> */}
+    <div>
+      <Toaster />
       <div
         onClick={() => navigate("/dashboard/profile")}
         className="flex items-center cursor-pointer ml-6 mt-10 mb-16"
@@ -96,7 +87,7 @@ const EditProfiel = () => {
       <div className="mx-6 p-9 rounded-xl bg-white shadow-md">
         <Form
           layout="vertical"
-          // initialValues={initialValues}
+          initialValues={initialValues}
           autoComplete="off"
           onFinish={handleUpdateProfile}
         >
@@ -105,15 +96,12 @@ const EditProfiel = () => {
               <div className="relative w-56 h-56 rounded-full flex justify-center items-center mt-5 bg-gray-50 border">
                 <Upload
                   name="avatar"
-
                   showUploadList={false}
                   onChange={handleUploadChange}
-                 
                 >
                   <img
                     className="w-44 h-44 rounded-full"
                     src={imageUrl}
-                    in
                     alt="Profile"
                   />
                   <Button
@@ -123,13 +111,10 @@ const EditProfiel = () => {
                     Change Picture
                   </Button>
                 </Upload>
-
               </div>
-
-
               <div className="text-center mt-6">
-                <p className="text-lg">{'admin'}</p>
-                <h1 className="text-2xl font-medium">{"absayed"}</h1>
+                <p className="text-lg">{profile?.data?.attributes?.role}</p>
+                <h1 className="text-2xl font-medium">{profile?.data?.attributes?.fullName}</h1>
               </div>
             </div>
 
@@ -139,7 +124,6 @@ const EditProfiel = () => {
                   label={<span className="text-lg font-medium">Name</span>}
                   name="name"
                   rules={[{ required: true, message: "Please input your name!" }]}
-                  // initialValue={"absayed"}
                 >
                   <Input
                     placeholder="Name"
@@ -150,15 +134,12 @@ const EditProfiel = () => {
                 <Form.Item
                   label={<span className="text-lg font-medium">Email</span>}
                   name="email"
-                  
                   rules={[{ required: true, message: "Please input your email!" }]}
-                  // initialValue={"ab@gamil.com"}
                 >
                   <Input
                     placeholder="Email"
                     readOnly
                     className="p-4 rounded-lg border-gray-300 bg-gray-100"
-                   
                   />
                 </Form.Item>
 
@@ -167,11 +148,10 @@ const EditProfiel = () => {
                   <PhoneInput
                     placeholder="Enter phone number"
                     international
-                    // defaultCountry="us"
                     value={phoneNumber}
                     onChange={setPhoneNumber}
                     className="p-2 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    style={{ height: '50px',  }}
+                    style={{ height: '50px' }}
                   />
                 </div>
               </div>
@@ -190,4 +170,4 @@ const EditProfiel = () => {
   );
 };
 
-export default EditProfiel;
+export default EditProfile;

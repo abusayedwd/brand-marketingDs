@@ -4,15 +4,17 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { HiOutlineMailOpen } from 'react-icons/hi';
 import { BiLock } from 'react-icons/bi';
+import { useAdminLoginMutation } from '../redux/features/auth/login';
+import toast, { Toaster } from 'react-hot-toast';
  
 
 const Login = () => {
     const [checkboxError, setCheckboxError] = useState('');
     const [isChecked, setIsChecked] = useState(false);
     const navigate = useNavigate()
-    const fcmToken = "Your-demo-fcm-token"; // Hardcoded demo FCM token
+    
     const [error, setError] = useState('')
- 
+ const [adminLogin, isLoading] = useAdminLoginMutation();
 
     const handleCheckboxChange = (e) => {
         setIsChecked(e.target.checked);
@@ -27,42 +29,35 @@ const Login = () => {
             setCheckboxError('You must agree to the terms');
             return;
         }
-        console.log(values);
-        navigate('/dashboard/user')
-
+         
         // // Include the fcmToken in the submitted values
-        // const formData = {
-        //     ...values,
-        //     fcmToken: fcmToken // Add fcmToken to the submission
-        // };
+     
         
-        // try{
-        //     const res = await adminLogin(formData).unwrap();
-        //     // console.log(res);
-        //     if(res?.code == 200){
-        //         toast.success(res?.message)
-        //          localStorage.setItem('user',JSON.stringify(res?.data?.attributes))
-        //          localStorage.setItem('token', res?.data?.attributes?.tokens?.access?.token)
-
+        try{
+            const res = await adminLogin(values).unwrap();
+            console.log(res);
+            if(res?.code == 200){
+                toast.success(res?.message)
+                 localStorage.setItem('user',JSON.stringify(res?.data?.attributes))
+                 localStorage.setItem('token', res?.data?.attributes?.tokens?.access?.token) 
                 
-        //     }
-        //     setTimeout(() => {
-                
-        //         navigate('/dashboard/home')
-        //     }, 1000);
+            }
+            setTimeout(() => { 
+                navigate('/dashboard/home')
+            }, 1500);
             
-        // }catch(error){
-        //     console.log(error);
-        //     setError(error?.data?.message)
+        }catch(error){
+            console.log(error);
+            setError(error?.data?.message)
             
-        // }
+        }
        
 
     };
 
     return (
         <div className="mt-12 h-auto md:h-[680px] shadow-xl w-[80%] md:w-[1096px] mx-auto bg-white rounded-[8px]">
-        
+          <Toaster />
             <div className="flex flex-col-reverse md:flex-row justify-around gap-4 px-6 md:px-10 mt-4 md:mt-8 py-4">
                 <div className="h-[200px] hidden md:block md:h-[488px] mt-4 md:mt-[100px]">
                     <img src={signin} alt="Signin" className="w-full h-full object-cover" />
@@ -85,8 +80,7 @@ const Login = () => {
                             label={<span className="text-[16px] mt-5 font-medium">Email</span>}
                             rules={[
                                 { required: true, message: "Please input your email!" },
-                                { type: 'email', message: 'Please enter a valid email address!' },
-                                { pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/, message: 'Please enter a Gmail address!' },
+                        
                             ]}
                         >
                             <Input
@@ -117,17 +111,17 @@ const Login = () => {
                                 </Checkbox>
                                 {checkboxError && <p className="text-red-500 font-medium">{checkboxError}</p>}
                             </Form.Item>
-                            <div className="mb-4 flex justify-between items-center">
+                            {/* <div className="mb-4 flex justify-between items-center">
                                 <Link to="/forgotpassword">
                                     <p className="cursor-pointer text-[14px] font-medium text-[#00BF63]">
                                         Forgot password?
                                     </p>
                                 </Link>
-                            </div>
+                            </div> */}
                         </div>
 
                         <Form.Item>
-                            {/* <p className='text-red-500 font-semibold'>{error}</p> */}
+                            <p className='text-red-500 font-semibold'>{error}</p>
                             <Button
                                 htmlType="submit"
                                 className="block w-full h-[52px] px-2 py-4 mt-2 text-[#FFFFFF] !bg-[#594756]"

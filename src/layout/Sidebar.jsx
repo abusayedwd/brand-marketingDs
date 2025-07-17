@@ -95,7 +95,7 @@ const Sidebar = () => {
            
 
             <NavLink
-              to="labtest"
+              to="campaigns"
               className={({ isActive }) =>
                 isActive
                   ? "flex cursor-pointer items-center text-[18px] font-medium p-[10px] bg-[#d8d0d0] text-[#193664] m-[6px] rounded-lg"
@@ -103,12 +103,12 @@ const Sidebar = () => {
               }
             >
              <TbTestPipe2 className="h-7 w-7 lg:h-5 lg:w-5" />
-              <span className="hidden ml-2 sm:block">Labs Test</span>
+              <span className="hidden ml-2 sm:block">Campaigns</span>
             </NavLink>
  
            
             <NavLink
-              to="pricing"
+              to="withdraw-request"
               className={({ isActive }) =>
                 isActive
                   ? "flex p-[10px] m-[6px] cursor-pointer items-center text-[18px] font-medium bg-[#d8d0d0] text-[#193664] rounded-lg"
@@ -116,7 +116,7 @@ const Sidebar = () => {
               }
             >
               <FaDollarSign className="h-7 w-7 lg:h-5 lg:w-5"/>
-              <span className="hidden ml-2 sm:block">Subscription</span>
+              <span className="hidden ml-2 sm:block">Withdraw Request</span>
             </NavLink>
 
 
