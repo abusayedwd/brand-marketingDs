@@ -1,4 +1,4 @@
-import { Button, Form, Input, Upload } from "antd";
+import { Button, Form, Input, Upload, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-number-input";
@@ -13,29 +13,26 @@ import { useUpdateAdminMutation } from "../../../redux/features/users/updateAdmi
 
 const EditProfile = () => {
   const navigate = useNavigate();
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [form] = Form.useForm();
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [fileList, setFileList] = useState([]);
   const [imageUrl, setImageUrl] = useState(defaultUserImage);
   const { data: profile, isLoading } = useLogedUserQuery();
-  const id = profile?.data?.attributes?.id;
-  const [updateProfile] = useUpdateAdminMutation();
-
-  // Set initial values for form fields
-  const initialValues = {
-    name: profile?.data?.attributes?.fullName || '',
-    email: profile?.data?.attributes?.email || '',
-    phoneNumber: profile?.data?.attributes?.phoneNumber || '',
-  };
+  const user = profile?.data?.attributes;
+  const id = user?.id;
+  const [updateProfile, { isLoading: saving }] = useUpdateAdminMutation();
 
   useEffect(() => {
-    if (profile?.data?.attributes) {
-      setPhoneNumber(profile?.data?.attributes.phoneNumber || '');
-      const existingImageUrl = url + profile?.data?.attributes?.image?.url;
-      if (existingImageUrl) {
-        setImageUrl(existingImageUrl);
-      }
+    if (!user) return;
+    form.setFieldsValue({
+      name: user.fullName || "",
+      email: user.email || "",
+    });
+    setPhoneNumber(user.phoneNumber || "");
+    if (user.image?.url) {
+      setImageUrl(`${url}${user.image.url}`);
     }
-  }, [profile]);
+  }, [user, form]);
 
   const handleUploadChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
@@ -49,123 +46,133 @@ const EditProfile = () => {
   const handleUpdateProfile = async (values) => {
     const formData = new FormData();
     formData.append("fullName", values?.name);
-    formData.append("phoneNumber", phoneNumber);
+    formData.append("phoneNumber", phoneNumber || "");
     if (fileList[0]?.originFileObj) {
       formData.append("image", fileList[0].originFileObj);
     }
 
-    console.log(values?.name, phoneNumber, fileList)
-
     try {
       const res = await updateProfile({ formData, id }).unwrap();
       if (res?.code === 200) {
-        toast.success(res?.message);
-        setTimeout(() => {
-          navigate('/dashboard/profile');
-        }, 1000);
+        toast.success(res?.message || "Profile updated");
+        setTimeout(() => navigate("/dashboard/profile"), 800);
       }
     } catch (error) {
-      console.log(error?.data);
+      toast.error(error?.data?.message || "Update failed");
     }
   };
 
-  if (isLoading || !profile?.data?.attributes) {
-    return <div>Loading...</div>;
+  if (isLoading || !user) {
+    return (
+      <div className="panel flex h-64 items-center justify-center">
+        <Spin />
+      </div>
+    );
   }
 
   return (
-    <div>
-      <Toaster />
-      <div
+    <div className="page-shell space-y-6">
+      <Toaster position="top-right" />
+
+      <button
+        type="button"
         onClick={() => navigate("/dashboard/profile")}
-        className="flex items-center cursor-pointer ml-6 mt-10 mb-16"
+        className="inline-flex items-center gap-1 text-sm font-semibold text-slate-600 transition hover:text-teal-700"
       >
-        <MdOutlineKeyboardArrowLeft size={30} />
-        <h1 className="text-xl font-medium ml-2">Edit Profile</h1>
+        <MdOutlineKeyboardArrowLeft size={22} />
+        Back to profile
+      </button>
+
+      <div>
+        <h1 className="page-title">Edit profile</h1>
+        <p className="page-subtitle">Update your admin name, phone, and photo</p>
       </div>
 
-      <div className="mx-6 p-9 rounded-xl bg-white shadow-md">
-        <Form
-          layout="vertical"
-          initialValues={initialValues}
-          autoComplete="off"
-          onFinish={handleUpdateProfile}
-        >
-          <div className="flex flex-col lg:flex-row gap-10">
-            <div className="flex flex-col items-center w-full lg:w-1/3 border-dotted border">
-              <div className="relative w-56 h-56 rounded-full flex justify-center items-center mt-5 bg-gray-50 border">
-                <Upload
-                  name="avatar"
-                  showUploadList={false}
-                  onChange={handleUploadChange}
-                >
-                  <img
-                    className="w-44 h-44 rounded-full"
-                    src={imageUrl}
-                    alt="Profile"
-                  />
-                  <Button
-                    className="border-none text-md text-blue-500 absolute bottom-6 flex items-center"
-                    icon={<LuImagePlus size={20} className="mr-2" />}
-                  >
-                    Change Picture
-                  </Button>
-                </Upload>
-              </div>
-              <div className="text-center mt-6">
-                <p className="text-lg">{profile?.data?.attributes?.role}</p>
-                <h1 className="text-2xl font-medium">{profile?.data?.attributes?.fullName}</h1>
-              </div>
+      <Form
+        form={form}
+        layout="vertical"
+        autoComplete="off"
+        onFinish={handleUpdateProfile}
+        requiredMark={false}
+        className="panel"
+      >
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <div className="flex w-full flex-col items-center lg:w-72">
+            <div className="relative flex h-48 w-48 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+              <img
+                className="h-full w-full object-cover"
+                src={imageUrl}
+                alt="Profile"
+              />
             </div>
-
-            <div className="flex-1 w-full lg:w-2/3">
-              <div className="flex flex-col gap-6">
-                <Form.Item
-                  label={<span className="text-lg font-medium">Name</span>}
-                  name="name"
-                  rules={[{ required: true, message: "Please input your name!" }]}
-                >
-                  <Input
-                    placeholder="Name"
-                    className="p-4 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={<span className="text-lg font-medium">Email</span>}
-                  name="email"
-                  rules={[{ required: true, message: "Please input your email!" }]}
-                >
-                  <Input
-                    placeholder="Email"
-                    readOnly
-                    className="p-4 rounded-lg border-gray-300 bg-gray-100"
-                  />
-                </Form.Item>
-
-                <div className="flex flex-col">
-                  <label className="text-lg font-medium mb-2">Phone Number</label>
-                  <PhoneInput
-                    placeholder="Enter phone number"
-                    international
-                    value={phoneNumber}
-                    onChange={setPhoneNumber}
-                    className="p-2 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    style={{ height: '50px' }}
-                  />
-                </div>
-              </div>
-            </div>
+            <Upload
+              name="avatar"
+              showUploadList={false}
+              beforeUpload={() => false}
+              onChange={handleUploadChange}
+              className="mt-4"
+            >
+              <Button
+                icon={<LuImagePlus size={18} />}
+                className="!h-10 !rounded-xl !border-teal-200 !text-teal-800"
+              >
+                Change picture
+              </Button>
+            </Upload>
+            <p className="mt-3 text-xs capitalize text-slate-500">{user.role}</p>
+            <p className="font-display text-lg font-semibold text-ink-900">
+              {user.fullName}
+            </p>
           </div>
 
-          <Button
-            htmlType="submit"
-            className="w-full mt-12 h-14 !bg-[#193664] !text-white rounded-lg text-lg font-medium"
-          >
-            Update Profile
-          </Button>
-        </Form>
-      </div>
+          <div className="min-w-0 flex-1">
+            <Form.Item
+              label="Full name"
+              name="name"
+              rules={[{ required: true, message: "Please enter your name" }]}
+            >
+              <Input size="large" placeholder="Full name" className="!rounded-xl" />
+            </Form.Item>
+
+            <Form.Item label="Email" name="email">
+              <Input
+                size="large"
+                readOnly
+                className="!rounded-xl !bg-slate-50"
+              />
+            </Form.Item>
+
+            <div className="mb-6">
+              <label className="mb-2 block text-sm text-slate-700">Phone number</label>
+              <PhoneInput
+                placeholder="Enter phone number"
+                international
+                value={phoneNumber}
+                onChange={setPhoneNumber}
+                className="admin-phone-input rounded-xl border border-slate-200 px-3 py-2"
+              />
+            </div>
+
+            <Button
+              htmlType="submit"
+              loading={saving}
+              className="!h-11 !w-full !rounded-xl !border-0 !bg-teal-700 !text-sm !font-semibold !text-white hover:!bg-teal-600 sm:!w-auto sm:!px-10"
+            >
+              Save changes
+            </Button>
+          </div>
+        </div>
+      </Form>
+
+      <style>{`
+        .admin-phone-input .PhoneInputInput {
+          border: none;
+          outline: none;
+          background: transparent;
+          font-size: 14px;
+          width: 100%;
+        }
+      `}</style>
     </div>
   );
 };
