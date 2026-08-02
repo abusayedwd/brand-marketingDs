@@ -1,33 +1,26 @@
-import { Outlet } from "react-router-dom"; 
- 
- 
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
- 
- 
-const Main = () => {
-    return (
-        <div>
-             <div className="flex p-4 min-h-screen">
-      <div className="fixed z-30 w-[200px] left-3"> 
-       <Sidebar />
-      </div> 
-      <div className="flex flex-col flex-1 overflow-hidden">
-        
-        <div className=" fixed xl:ml-[310px] lg:ml-[250px] md:ml-[200px] sm:ml-[120px] ml-[120px] w-[75%] mx-auto z-30  lg:w-[calc(98%-300px)]">
-         <Header />
-        </div>
 
-        <div className="overflow-y-auto ml-8 mt-12 h-full flex-1 pt-[80px] lg:pl-[280px] md:pl-[220px] sm:pl-[160px] pl-[120px]">
-          <Outlet />
+const Main = () => {
+  return (
+    <div className="min-h-screen">
+      <div className="flex min-h-screen">
+        <aside className="fixed inset-y-0 left-0 z-40 w-[88px] lg:w-[260px]">
+          <Sidebar />
+        </aside>
+
+        <div className="flex min-h-screen w-full flex-col pl-[88px] lg:pl-[260px]">
+          <div className="sticky top-0 z-30 px-3 pt-3 sm:px-5 sm:pt-4">
+            <Header />
+          </div>
+          <main className="page-shell flex-1 py-5 sm:py-6">
+            <Outlet />
+          </main>
         </div>
       </div>
-       
     </div>
-        </div>
-    );
+  );
 };
 
 export default Main;
-
- 

@@ -1,3 +1,221 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --ink: #0f1c2e;
+  --accent: #0f766e;
+  --surface: #f5f7fa;
+  --card: #ffffff;
+  --muted: #64748b;
+  --border: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(15, 118, 110, 0.08), transparent 55%),
+    radial-gradient(900px 420px at 100% 0%, rgba(28, 43, 58, 0.06), transparent 50%),
+    var(--surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: "Sora", system-ui, sans-serif;
+}
+
+@layer components {
+  .page-shell {
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .page-shell {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  .page-title {
+    font-family: "Sora", system-ui, sans-serif;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+    color: #0f1c2e;
+    letter-spacing: -0.025em;
+  }
+
+  @media (min-width: 640px) {
+    .page-title {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+  }
+
+  .page-subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #64748b;
+  }
+
+  .stat-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: #fff;
+    padding: 1.25rem;
+    box-shadow: 0 10px 30px rgba(15, 28, 46, 0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px rgba(15, 28, 46, 0.1);
+  }
+
+  .panel {
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: #fff;
+    padding: 1.25rem;
+    box-shadow: 0 10px 30px rgba(15, 28, 46, 0.06);
+  }
+
+  @media (min-width: 640px) {
+    .panel {
+      padding: 1.5rem;
+    }
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+  }
+
+  .nav-item-active {
+    background: #0f766e;
+    color: #fff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+}
+
+.ant-table-wrapper .ant-table {
+  background: transparent;
+}
+
+.ant-table-thead > tr > th {
+  background: #f8fafc !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+.ant-btn-primary {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+}
+
+.ant-btn-primary:hover {
+  background: #0d5c56 !important;
+  border-color: #0d5c56 !important;
+}
+
+.rich-html p {
+  margin: 0 0 0.85rem;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.rich-html strong {
+  color: #0f1c2e;
+  font-weight: 700;
+}
+
+.rich-html ul,
+.rich-html ol {
+  margin: 0 0 1rem 1.25rem;
+}
+
+.rich-html a {
+  color: #0f766e;
+  text-decoration: underline;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-item {
+  border-radius: 0.9rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 0.85rem 1rem;
+}
+
+.detail-item .label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.detail-item .value {
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f1c2e;
+  word-break: break-word;
+}

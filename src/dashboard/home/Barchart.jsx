@@ -1,192 +1,101 @@
- 
+import React, { useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { useAdminEarningChartQuery } from "../../redux/features/earningStatus/adminEarningChart";
+import { useAdminPaymentToInfluencerQuery } from "../../redux/features/earningStatus/adminPaymentToInfluencer";
 
+const years = ["2024", "2025", "2026", "2027", "2028"];
 
-import React, { useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useAdminEarningChartQuery } from '../../redux/features/earningStatus/adminEarningChart';
-import { useAdminPaymentToInfluencerQuery } from '../../redux/features/earningStatus/adminPaymentToInfluencer';
+const ChartPanel = ({ title, year, onYearChange, data, color }) => (
+  <div className="panel">
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <h2 className="font-display text-lg font-semibold text-ink-900">{title}</h2>
+      <select
+        value={year}
+        onChange={(e) => onYearChange(e.target.value)}
+        className="rounded-lg border border-slate-200 bg-surface-muted px-3 py-1.5 text-sm outline-none focus:border-accent"
+      >
+        {years.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <ResponsiveContainer width="100%" height={280}>
+      <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id={`grad-${title}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={color} stopOpacity={0.35} />
+            <stop offset="95%" stopColor={color} stopOpacity={0.02} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
+        <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+        <Tooltip
+          contentStyle={{
+            borderRadius: 12,
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 10px 30px rgba(15,28,46,0.08)",
+          }}
+        />
+        <Area
+          type="monotone"
+          dataKey="earning"
+          stroke={color}
+          fill={`url(#grad-${title})`}
+          strokeWidth={2.5}
+          name="Amount"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  </div>
+);
 
 const Barchart = () => {
-  const [selectedPaymentYear, setSelectedPaymentYear] = useState('2025');
-  const [selectedIncomeYear, setSelectedIncomeYear] = useState('2025');
+  const [selectedPaymentYear, setSelectedPaymentYear] = useState("2026");
+  const [selectedIncomeYear, setSelectedIncomeYear] = useState("2026");
 
- const {data : adminEarningchartData} = useAdminEarningChartQuery(selectedIncomeYear)
- const {data : adminPaymentchartData} = useAdminPaymentToInfluencerQuery(selectedPaymentYear)
+  const { data: adminEarningchartData } = useAdminEarningChartQuery(selectedIncomeYear);
+  const { data: adminPaymentchartData } = useAdminPaymentToInfluencerQuery(selectedPaymentYear);
 
-  
- console.log(adminPaymentchartData)
+  const formattedAreaChartData =
+    adminEarningchartData?.data?.attributes?.map((item) => ({
+      month: item.month,
+      earning: parseFloat(item.totalEarnings),
+    })) || [];
 
- const formattedAreaChartData = adminEarningchartData?.data?.attributes?.map((item) => ({
-    month: item.month,
-    earning: parseFloat(item.totalEarnings),  // Assuming totalEarnings is a string, converting it to number
-  })) || [];
-
- const formattedPaymentChartData = adminPaymentchartData?.data?.attributes?.map((item) => ({
-    month: item.month,
-    earning: parseFloat(item.totalEarnings),  // Assuming totalEarnings is a string, converting it to number
-  })) || [];
-
-  // Sample data for different years
-  const yearlyData = {
-    '2023': [
-      { month: 'Jan', payment: 25, income: 30 },
-      { month: 'Feb', payment: 30, income: 35 },
-      { month: 'Mar', payment: 35, income: 40 },
-      { month: 'Apr', payment: 40, income: 45 },
-      { month: 'May', payment: 45, income: 50 },
-      { month: 'Jun', payment: 50, income: 55 },
-      { month: 'Jul', payment: 55, income: 60 },
-      { month: 'Aug', payment: 45, income: 50 },
-      { month: 'Sep', payment: 40, income: 45 },
-      { month: 'Oct', payment: 35, income: 40 },
-      { month: 'Nov', payment: 30, income: 35 },
-      { month: 'Dec', payment: 25, income: 30 }
-    ],
-    '2024': [
-      { month: 'Jan', payment: 30, income: 35 },
-      { month: 'Feb', payment: 35, income: 40 },
-      { month: 'Mar', payment: 40, income: 45 },
-      { month: 'Apr', payment: 45, income: 50 },
-      { month: 'May', payment: 50, income: 55 },
-      { month: 'Jun', payment: 55, income: 60 },
-      { month: 'Jul', payment: 60, income: 65 },
-      { month: 'Aug', payment: 50, income: 55 },
-      { month: 'Sep', payment: 45, income: 50 },
-      { month: 'Oct', payment: 40, income: 45 },
-      { month: 'Nov', payment: 35, income: 40 },
-      { month: 'Dec', payment: 30, income: 35 }
-    ],
-    '2025': [
-      { month: 'Jan', payment: 35, income: 40 },
-      { month: 'Feb', payment: 40, income: 45 },
-      { month: 'Mar', payment: 45, income: 50 },
-      { month: 'Apr', payment: 50, income: 55 },
-      { month: 'May', payment: 55, income: 60 },
-      { month: 'Jun', payment: 60, income: 65 },
-      { month: 'Jul', payment: 65, income: 70 },
-      { month: 'Aug', payment: 55, income: 60 },
-      { month: 'Sep', payment: 50, income: 55 },
-      { month: 'Oct', payment: 45, income: 50 },
-      { month: 'Nov', payment: 40, income: 45 },
-      { month: 'Dec', payment: 35, income: 40 }
-    ]
-  };
-
-
-
-  const currentPaymentData = yearlyData[selectedPaymentYear];
-  const currentIncomeData = yearlyData[selectedIncomeYear];
-
-  const CustomTooltip = ({ active, payload, label, year }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-800">{`${label} ${year}`}</p>
-          {payload.map((entry, index) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {`${entry.name}: ${entry.value}k`}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+  const formattedPaymentChartData =
+    adminPaymentchartData?.data?.attributes?.map((item) => ({
+      month: item.month,
+      earning: parseFloat(item.totalEarnings),
+    })) || [];
 
   return (
-    <div className="w-full mx-auto p-6 bg-white">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Total Payment Chart */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Total Payment</h2>
-            <select 
-              value={selectedPaymentYear}
-              onChange={(e) => setSelectedPaymentYear(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-              <option value="2028">2028</option>
-              <option value="2029">2029</option>
-              <option value="2030">2030</option>
-            </select>
-          </div>
-          
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={formattedPaymentChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="month" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#6B7280' }}
-              />
-              <YAxis 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#6B7280' }}
-              />
-              <Tooltip content={(props) => <CustomTooltip {...props} year={selectedPaymentYear} />} />
-              <Area 
-                type="monotone" 
-                dataKey="earning" 
-                stroke="#8B5CF6" 
-                fill="#8B5CF6"
-                fillOpacity={0.6}
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Total Income Chart */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Total Income</h2>
-            <select 
-              value={selectedIncomeYear}
-              onChange={(e) => setSelectedIncomeYear(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-              <option value="2028">2028</option>
-              <option value="2029">2029</option>
-              <option value="2030">2030</option>
-            </select>
-          </div>
-          
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={formattedAreaChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="month" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#6B7280' }}
-              />
-              <YAxis 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#6B7280' }}
-              />
-              <Tooltip content={(props) => <CustomTooltip {...props} year={selectedIncomeYear} />} />
-              <Area 
-                type="monotone" 
-                dataKey="earning" 
-                stroke="#10B981" 
-                fill="#10B981"
-                fillOpacity={0.6}
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+    <div className="page-shell grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <ChartPanel
+        title="Payouts to influencers"
+        year={selectedPaymentYear}
+        onYearChange={setSelectedPaymentYear}
+        data={formattedPaymentChartData}
+        color="#0F766E"
+      />
+      <ChartPanel
+        title="Subscription income"
+        year={selectedIncomeYear}
+        onYearChange={setSelectedIncomeYear}
+        data={formattedAreaChartData}
+        color="#1C2B3A"
+      />
     </div>
   );
 };

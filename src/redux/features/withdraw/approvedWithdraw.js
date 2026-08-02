@@ -5,12 +5,12 @@ import { apiSlice } from "../../api/apiSlice";
 const approvedWithdraw = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         approvedWithdraw: builder.mutation({
-            query: ({data,id}) => ({
+            query: ({ data, withdrawData, id }) => ({
                 url: `/withdraw/Payment-approveWithdrawal/${id}`,
                 method: "POST",
-                body: data
+                body: data || withdrawData,
             }),
-            invalidatesTags: [{type: "Wallet"}]
+            invalidatesTags: [{ type: "Wallet" }],
         })
     })
 })

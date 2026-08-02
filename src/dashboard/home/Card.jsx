@@ -1,86 +1,85 @@
-import React from 'react';
-import { Users, UserCheck, DollarSign, TrendingUp } from 'lucide-react';
-import { useAdminEarningQuery } from '../../redux/features/earningStatus/adminEarning';
+import React from "react";
+import { Users, UserCheck, DollarSign, TrendingUp, Wallet, Landmark } from "lucide-react";
+import { useAdminEarningQuery } from "../../redux/features/earningStatus/adminEarning";
+
+const formatValue = (value, isMoney = false) => {
+  if (value === undefined || value === null || value === "") return "—";
+  if (isMoney) {
+    const num = Number(value);
+    if (Number.isNaN(num)) return value;
+    return `$${num.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  }
+  return value;
+};
 
 const Card = () => {
-
- const {data: status} = useAdminEarningQuery();
-//  console.log(status?.data?.attributes)
+  const { data: status, isLoading } = useAdminEarningQuery();
   const value = status?.data?.attributes;
-
-
-
 
   const statusData = [
     {
-      title: "My Total Earning from Subscription",
-      value: value?.totalEarnAdmin,
-      icon: Users,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
+      title: "Subscription earnings",
+      value: formatValue(value?.totalEarnAdmin, true),
+      icon: Landmark,
+      tone: "bg-teal-50 text-accent",
     },
     {
-      title: "Total Content Creator",
-      value: value?.influencers,
+      title: "Content creators",
+      value: formatValue(value?.influencers),
       icon: Users,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
+      tone: "bg-sky-50 text-sky-700",
     },
     {
-      title: "Total Brand",
-      value: value?.brands,
+      title: "Brands",
+      value: formatValue(value?.brands),
       icon: UserCheck,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
+      tone: "bg-amber-50 text-amber-700",
     },
-     {
-      title: "Total Campaign",
-      value: value?.campaigns,
+    {
+      title: "Campaigns",
+      value: formatValue(value?.campaigns),
       icon: TrendingUp,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
+      tone: "bg-indigo-50 text-indigo-700",
     },
     {
-      title: "Total payment from campaign",
-      value: value?.campaignPaymentTotal,
+      title: "Campaign payments in",
+      value: formatValue(value?.campaignPaymentTotal, true),
       icon: DollarSign,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
+      tone: "bg-emerald-50 text-emerald-700",
     },
     {
-      title: "Total Payment to Influencer",
-      value:  value?.withdrawPayment,
-      icon: DollarSign,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
+      title: "Paid to influencers",
+      value: formatValue(value?.withdrawPayment, true),
+      icon: Wallet,
+      tone: "bg-rose-50 text-rose-700",
     },
-    
     {
-      title: "Current Balance Campaign Payment",
-      value: value?.currentBalance,
+      title: "Campaign balance",
+      value: formatValue(value?.currentBalance, true),
       icon: DollarSign,
-      iconColor: "text-blue-500",
-      iconBg: "bg-blue-50"
+      tone: "bg-slate-100 text-slate-700",
     },
-   
   ];
 
   return (
-    <div className="w-full mx-auto p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statusData.map((item, index) => (
-          <div key={index} className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-500 mb-1">
-                  {item.title}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {item.value}
+    <div className="page-shell mb-6">
+      <div className="mb-5">
+        <h2 className="page-title">Overview</h2>
+        <p className="page-subtitle">Live platform metrics from subscriptions, campaigns, and payouts.</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {statusData.map((item) => (
+          <div key={item.title} className="stat-card">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-slate-500">{item.title}</p>
+                <p className="mt-2 font-display text-2xl font-semibold text-ink-900">
+                  {isLoading ? "…" : item.value}
                 </p>
               </div>
-              <div className={`p-3 rounded-lg ${item.iconBg}`}>
-                <item.icon className={`w-6 h-6 ${item.iconColor}`} />
+              <div className={`rounded-xl p-3 ${item.tone}`}>
+                <item.icon className="h-5 w-5" />
               </div>
             </div>
           </div>

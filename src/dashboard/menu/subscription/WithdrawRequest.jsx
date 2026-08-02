@@ -132,6 +132,7 @@ import { EyeOutlined, DollarOutlined, CheckCircleOutlined, ClockCircleOutlined }
 import { useGetWithdrawRequestQuery } from '../../../redux/features/withdraw/getWithdrawRequest';
 import url from '../../../redux/api/baseUrl';
 import { useApprovedWithdrawMutation } from '../../../redux/features/withdraw/approvedWithdraw';
+import { useRejectWithdrawMutation } from '../../../redux/features/withdraw/rejectWithdraw';
 
 const { TextArea } = Input;
 
@@ -144,6 +145,7 @@ const WithdrawRequestPage = () => {
   const [paymentImage, setPaymentImage] = useState(null);
 
  const [approvedWithdraw] = useApprovedWithdrawMutation()
+ const [rejectWithdraw] = useRejectWithdrawMutation()
 
 
   useEffect(() => {
@@ -261,8 +263,8 @@ const WithdrawRequestPage = () => {
     );
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-64">Loading...</div>;
-  if (error) return <div className="flex justify-center items-center h-64 text-red-500">Error loading withdraw requests</div>;
+  if (isLoading) return <div className="panel flex h-64 items-center justify-center text-slate-500">Loading withdrawals…</div>;
+  if (error) return <div className="panel flex h-64 items-center justify-center text-rose-500">Error loading withdraw requests</div>;
 
   // Columns for the Ant Design Table
   const columns = [
@@ -320,6 +322,7 @@ const WithdrawRequestPage = () => {
             View Details
           </Button>
           {withdraw.status === 'pending' && (
+            <>
             <Button 
               type="primary" 
               icon={<DollarOutlined />}
@@ -328,6 +331,25 @@ const WithdrawRequestPage = () => {
             >
               Payment
             </Button>
+            <Button
+              danger
+              onClick={async () => {
+                const rejectionReason = window.prompt('Rejection reason', 'Insufficient documentation');
+                if (rejectionReason === null) return;
+                try {
+                  await rejectWithdraw({
+                    id: withdraw.id || withdraw._id,
+                    rejectionReason,
+                  }).unwrap();
+                  message.success('Withdrawal rejected and hold released');
+                } catch (err) {
+                  message.error(err?.data?.message || 'Reject failed');
+                }
+              }}
+            >
+              Reject
+            </Button>
+            </>
           )}
         </Space>
       ),
@@ -335,13 +357,13 @@ const WithdrawRequestPage = () => {
   ];
 
   return (
-    <div className="mx-auto mt-8 px-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Withdraw Requests</h1>
-        <p className="text-gray-600">Manage and process withdrawal requests from influencers</p>
+    <div className="space-y-4">
+      <div>
+        <h1 className="page-title">Withdraw requests</h1>
+        <p className="page-subtitle">Review and approve influencer payout requests</p>
       </div>
       
-      <Card className="shadow-lg">
+      <Card className="!rounded-2xl !border-slate-200/80 !shadow-soft">
         <Table
           columns={columns}
           dataSource={withdrawData?.data?.attributes?.results || []}
@@ -358,60 +380,62 @@ const WithdrawRequestPage = () => {
 
       {/* Details Modal */}
       <Modal
-        title={
-          <div className="flex items-center space-x-2">
-            <EyeOutlined className="text-blue-500" />
-            <span>Withdraw Request Details</span>
-          </div>
-        }
-        visible={isModalVisible}
+        title={null}
+        open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
-        width={800}
+        width={820}
       >
         {selectedWithdraw && (
-          <div className="space-y-6">
-            <Card className="bg-gray-50">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Influencer Name</p>
-                  <p className="font-semibold text-gray-800">{selectedWithdraw.influencerId.fullName}</p>
+          <div className="space-y-5">
+            <div className="border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2">
+                <EyeOutlined className="text-accent" />
+                <h2 className="font-display text-xl font-semibold text-ink-900">Withdraw request</h2>
+                {getStatusTag(selectedWithdraw.status)}
+              </div>
+              <p className="mt-1 text-sm text-slate-500">Payout review and bank details</p>
+            </div>
+            <Card className="!rounded-2xl !border-slate-200 !bg-slate-50">
+              <div className="detail-grid">
+                <div className="detail-item !bg-white">
+                  <p className="label">Influencer</p>
+                  <p className="value">{selectedWithdraw.influencerId?.fullName}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-semibold text-gray-800">{selectedWithdraw.influencerId.email}</p>
+                <div className="detail-item !bg-white">
+                  <p className="label">Email</p>
+                  <p className="value">{selectedWithdraw.influencerId?.email}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Amount</p>
-                  <p className="font-bold text-green-600 text-xl">${selectedWithdraw.amount}</p>
+                <div className="detail-item !bg-white">
+                  <p className="label">Amount</p>
+                  <p className="value text-emerald-700">${selectedWithdraw.amount}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Status</p>
-                  {getStatusTag(selectedWithdraw.status)}
+                <div className="detail-item !bg-white">
+                  <p className="label">Status</p>
+                  <div className="mt-1">{getStatusTag(selectedWithdraw.status)}</div>
                 </div>
               </div>
             </Card>
 
-            <Card title="Request Details">
-              <p><strong>Reason:</strong> {selectedWithdraw.reason || 'No reason provided'}</p>
-            </Card>
+            <div className="detail-item">
+              <div className="label">Request reason</div>
+              <p className="mt-2 text-sm text-slate-700">{selectedWithdraw.reason || 'No reason provided'}</p>
+            </div>
 
-            <Card title="Bank Details">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Bank Name</p>
-                  <p className="font-semibold">{selectedWithdraw.bankDetails.bankName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Account Number</p>
-                  <p className="font-semibold">{selectedWithdraw.bankDetails.accountNumber}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Holder Name</p>
-                  <p className="font-semibold">{selectedWithdraw.bankDetails.holderName}</p>
-                </div>
+            <div className="detail-grid">
+              <div className="detail-item">
+                <p className="label">Bank name</p>
+                <p className="value">{selectedWithdraw.bankDetails?.bankName}</p>
               </div>
-            </Card>
+              <div className="detail-item">
+                <p className="label">Account number</p>
+                <p className="value">{selectedWithdraw.bankDetails?.accountNumber}</p>
+              </div>
+              <div className="detail-item">
+                <p className="label">Holder name</p>
+                <p className="value">{selectedWithdraw.bankDetails?.holderName}</p>
+              </div>
+            </div>
 
             {selectedWithdraw.status === 'approved' && selectedWithdraw.approvalNote && (
               <Card title="Approval Note" className="bg-green-50 border-green-200">
@@ -440,7 +464,7 @@ const WithdrawRequestPage = () => {
             <span>Process Payment</span>
           </div>
         }
-        visible={isPaymentModalVisible}
+        open={isPaymentModalVisible}
         onCancel={handlePaymentCancel}
         footer={null}
         width={600}

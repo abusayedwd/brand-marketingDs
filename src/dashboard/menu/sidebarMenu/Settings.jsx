@@ -1,161 +1,56 @@
-import { Button, Form, Input, Modal } from "antd";
-import { useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
-import { Link, useNavigate } from "react-router-dom";
-// import { EyeInvisibleOutlined, EyeTwoTone, LockOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+
+const links = [
+  {
+    title: "Subscription plans",
+    desc: "Create and price marketplace subscription plans",
+    path: "/dashboard/plans",
+  },
+  {
+    title: "Privacy Policy",
+    desc: "Manage privacy content shown on the website",
+    path: "/dashboard/settings/privacypolicy",
+  },
+  {
+    title: "Terms and Conditions",
+    desc: "Update platform terms for brands and creators",
+    path: "/dashboard/settings/termcondition",
+  },
+  {
+    title: "About Us",
+    desc: "Edit company story and about page copy",
+    path: "/dashboard/settings/about",
+  },
+];
 
 const Settings = () => {
   const navigate = useNavigate();
 
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const openModal = () => {
-  //   setIsModalOpen(true);
-  // };
-
-  // const changePassword = (values) => {
-  //   const { confirmPassword, ...ChangePassword } = values;
-  //   console.log("Form values: ", ChangePassword);
-  // };
-
   return (
-    <div className="mt-8 mx-6 ">
-      <h1 className="font-semibold text-[30px]">Settings</h1>
+    <div className="space-y-5">
       <div>
-        {/* <div onClick={openModal} className="mt-8 cursor-pointer flex justify-between border rounded border-[#00BF63] items-center w-full h-[75px]">
-          <p className="text-[18px] ml-8 font-medium text-[#00BF63]">
-            Change Password
-          </p>
-          <p className="mr-8 bg-[#69C0BE] px-2 py-1 rounded cursor-pointer">
-            <IoIosArrowForward />
-          </p>
-        </div>
-        <Modal
-          open={isModalOpen}
-          onOk={() => setIsModalOpen(false)}
-          onCancel={() => setIsModalOpen(false)}
-          footer={null}
-        >
-          <div className="flex flex-col w-[80%] mx-auto ">
-            <h2 className="text-[28px] text-left font-semibold mb-4">Change Password</h2>
-            <p className="  mb-8 text-gray-600">Your password must be 8-10 character long.</p>
-            <Form
-              name="changePassword"
-              layout="vertical"
-              onFinish={changePassword}
-             
-            >
-              <Form.Item
-                name="oldPassword"
-                label="Old Password"
-                rules={[{ required: true, message: "Please enter your old password!" }]}
-              >
-                <Input.Password
-                 style={{
-                  height: "40px",
-                  background: "#E6F9EF",
-                  outline: "none",
-                 
-                  border: '1px solid green'
-                }}
-                  placeholder="Old Password"
-                  prefix={<LockOutlined />}
-                  iconRender={(visible) =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                  }
-                />
-              </Form.Item>
+        <h1 className="page-title">Settings</h1>
+        <p className="page-subtitle">CMS pages and legal content for the public site.</p>
+      </div>
 
-              <Form.Item
-                name="newPassword"
-                label="New Password"
-                rules={[{ required: true, message: "Please enter your new password!" }]}
-              >
-                <Input.Password
-                   style={{
-                    height: "40px",
-                    background: "#E6F9EF",
-                    outline: "none",
-                   
-                    border: '1px solid green'
-                  }}
-                  placeholder="New Password"
-                  prefix={<LockOutlined />}
-                  iconRender={(visible) =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                  }
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="confirmPassword"
-                label="Confirm Password"
-                dependencies={["newPassword"]}
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                    message: "Please confirm your new password!",
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue("newPassword") === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(
-                        new Error("The two passwords that you entered do not match!")
-                      );
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password
-                  style={{
-                    height: "40px",
-                    background: "#E6F9EF",
-                    outline: "none",
-                   
-                    border: '1px solid green'
-                  }}
-                  placeholder="Confirm Password"
-                  prefix={<LockOutlined />}
-                  iconRender={(visible) =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                  }
-                />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="w-full h-10 py-3 !bg-[#69C0BE] !text-black text-[16px] rounded-md"
-                >
-                  Change Password
-                </Button>
-              </Form.Item>
-            </Form>
-          </div>
-        </Modal> */}
-
-        {/* Privacy policy */}
-        <div onClick={() => navigate("/dashboard/settings/privacypolicy")} className="mt-8 cursor-pointer flex justify-between bg-[#F7F7F7] rounded items-center w-full h-[75px]">
-          <p className="text-[18px] ml-8 font-medium">Privacy Policy</p>
-          <Link to="/dashboard/settings/privacypolicy" className="mr-8 text-[#193664] px-2 py-1 rounded cursor-pointer">
-            <IoIosArrowForward />
-          </Link>
-        </div>
-        <div onClick={() => navigate("/dashboard/settings/termcondition")} className="mt-8 flex justify-between cursor-pointer bg-[#F7F7F7] rounded items-center w-full h-[75px]">
-          <p className="text-[18px] ml-8 font-medium">Terms and Condition</p>
-          <Link to="/dashboard/settings/termcondition" className="mr-8 text-[#193664] px-2 py-1 rounded cursor-pointer">
-            <IoIosArrowForward />
-          </Link>
-        </div>
-        <div onClick={() => navigate("/dashboard/settings/about")} className="mt-8 cursor-pointer flex justify-between bg-[#F7F7F7] rounded items-center w-full h-[75px]">
-          <p className="text-[18px] ml-8 font-medium">About Us</p>
-          <Link to="/dashboard/settings/about" className="mr-8 text-[#193664] px-2 py-1 rounded cursor-pointer">
-            <IoIosArrowForward />
-          </Link>
-        </div>
+      <div className="grid gap-3">
+        {links.map((item) => (
+          <button
+            key={item.path}
+            type="button"
+            onClick={() => navigate(item.path)}
+            className="panel flex w-full items-center justify-between text-left transition hover:border-accent/40 hover:shadow-lift"
+          >
+            <div>
+              <p className="font-display text-base font-semibold text-ink-900">
+                {item.title}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{item.desc}</p>
+            </div>
+            <IoIosArrowForward className="text-xl text-accent" />
+          </button>
+        ))}
       </div>
     </div>
   );
