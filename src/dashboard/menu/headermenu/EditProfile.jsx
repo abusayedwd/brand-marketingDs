@@ -5,9 +5,8 @@ import PhoneInput from "react-phone-number-input";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { LuImagePlus } from "react-icons/lu";
 import "react-phone-number-input/style.css";
-import defaultUserImage from "../../../../public/image/randomuser.jpg";
 import { useLogedUserQuery } from "../../../redux/features/users/logedUser";
-import url from "../../../redux/api/baseUrl";
+import getMediaUrl, { DEFAULT_AVATAR } from "../../../utils/getMediaUrl";
 import toast, { Toaster } from "react-hot-toast";
 import { useUpdateAdminMutation } from "../../../redux/features/users/updateAdmin";
 
@@ -16,7 +15,7 @@ const EditProfile = () => {
   const [form] = Form.useForm();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fileList, setFileList] = useState([]);
-  const [imageUrl, setImageUrl] = useState(defaultUserImage);
+  const [imageUrl, setImageUrl] = useState(DEFAULT_AVATAR);
   const { data: profile, isLoading } = useLogedUserQuery();
   const user = profile?.data?.attributes;
   const id = user?.id;
@@ -29,8 +28,8 @@ const EditProfile = () => {
       email: user.email || "",
     });
     setPhoneNumber(user.phoneNumber || "");
-    if (user.image?.url) {
-      setImageUrl(`${url}${user.image.url}`);
+    if (user.image) {
+      setImageUrl(getMediaUrl(user.image, DEFAULT_AVATAR));
     }
   }, [user, form]);
 

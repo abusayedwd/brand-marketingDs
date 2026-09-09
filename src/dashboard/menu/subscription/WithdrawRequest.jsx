@@ -130,7 +130,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Space, Tag, Input, message, Card, Divider } from 'antd';
 import { EyeOutlined, DollarOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useGetWithdrawRequestQuery } from '../../../redux/features/withdraw/getWithdrawRequest';
-import url from '../../../redux/api/baseUrl';
+import getMediaUrl from '../../../utils/getMediaUrl';
 import { useApprovedWithdrawMutation } from '../../../redux/features/withdraw/approvedWithdraw';
 import { useRejectWithdrawMutation } from '../../../redux/features/withdraw/rejectWithdraw';
 
@@ -443,10 +443,10 @@ const WithdrawRequestPage = () => {
               </Card>
             )}
 
-            {selectedWithdraw.image?.url && (
+            {selectedWithdraw.image && (
               <Card title="Bank Signature">
                 <img
-                  src={url + selectedWithdraw.image.url}
+                  src={getMediaUrl(selectedWithdraw.image)}
                   alt="Bank Signature"
                   className="w-full max-w-md h-auto border rounded-lg shadow-sm"
                 />

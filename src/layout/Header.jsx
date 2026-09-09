@@ -4,7 +4,7 @@ import { DownOutlined, EyeInvisibleOutlined, EyeTwoTone, LockOutlined } from "@a
 import Swal from "sweetalert2";
 import { useState } from "react";
 import { useLogedUserQuery } from "../redux/features/users/logedUser";
-import url from "./../redux/api/baseUrl";
+import getMediaUrl from "../utils/getMediaUrl";
 import { useChangPasswordMutation } from "../redux/features/auth/changePassword";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -82,7 +82,7 @@ const Header = () => {
           className="flex items-center gap-2 rounded-full border border-slate-200 bg-surface-muted px-2 py-1.5 transition hover:border-accent/40"
         >
           <Avatar
-            src={admin?.image?.url ? url + admin.image.url : undefined}
+            src={getMediaUrl(admin?.image) || undefined}
             className="!bg-accent"
           >
             {admin?.fullName?.[0] || "A"}

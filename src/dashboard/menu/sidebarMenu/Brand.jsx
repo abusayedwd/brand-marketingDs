@@ -3,7 +3,7 @@ import { Table, Button, Space, Input, Tag, message } from "antd";
 import { useGetBrandQuery } from "../../../redux/features/users/brand";
 import { useModerateUserMutation } from "../../../redux/features/users/moderateUser";
 import DetailsModal, { DetailItem } from "../../../components/DetailsModal";
-import url from "../../../redux/api/baseUrl";
+import getMediaUrl from "../../../utils/getMediaUrl";
 
 const BrandListPage = () => {
   const { data: brandData, isLoading, error, refetch } = useGetBrandQuery();
@@ -17,6 +17,9 @@ const BrandListPage = () => {
       await moderateUser({ id, ...body }).unwrap();
       message.success("Brand updated");
       refetch();
+      if (selectedBrand && (selectedBrand.id === id || selectedBrand._id === id)) {
+        setSelectedBrand((prev) => ({ ...prev, ...body }));
+      }
     } catch (err) {
       message.error(err?.data?.message || "Moderation failed");
     }
@@ -36,6 +39,12 @@ const BrandListPage = () => {
     );
   }, [brands, search]);
 
+  const statusBadge = (row) => {
+    if (row?.isBanned) return "Banned";
+    if (row?.isSuspended) return "Suspended";
+    return "Active";
+  };
+
   const columns = [
     { title: "#", width: 60, render: (_, __, index) => index + 1 },
     {
@@ -44,18 +53,20 @@ const BrandListPage = () => {
       render: (_, row) => (
         <div className="flex items-center gap-3">
           <img
-            src={row?.image?.url ? url + row.image.url : "/image/logo.png"}
+            src={getMediaUrl(row?.image, "/image/logo.png")}
             alt=""
             className="h-11 w-11 rounded-xl object-cover ring-1 ring-slate-200"
           />
           <div>
-            <p className="font-semibold text-ink-800">{row.companyName || row.fullName}</p>
+            <p className="font-semibold text-ink-800">
+              {row.companyName || row.fullName}
+            </p>
             <p className="text-xs text-slate-500">{row.fullName}</p>
           </div>
         </div>
       ),
     },
-    { title: "Industry", dataIndex: "industry", key: "industry" },
+    { title: "Industry", dataIndex: "industry", key: "industry", render: (v) => v || "—" },
     { title: "Email", dataIndex: "email", key: "email" },
     {
       title: "Website",
@@ -93,7 +104,7 @@ const BrandListPage = () => {
               setIsModalVisible(true);
             }}
           >
-            View
+            View details
           </Button>
           <Button
             size="small"
@@ -159,38 +170,81 @@ const BrandListPage = () => {
         }}
         title={selectedBrand?.companyName || selectedBrand?.fullName || "Brand details"}
         subtitle={selectedBrand?.email}
-        badge={selectedBrand?.industry || "Brand"}
+        badge={statusBadge(selectedBrand)}
+        avatar={selectedBrand?.image}
+        meta={[
+          selectedBrand?.industry,
+          selectedBrand?.phoneNumber,
+          selectedBrand?.isEmailVerified ? "Email verified" : null,
+        ].filter(Boolean)}
       >
         {selectedBrand && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <img
-                src={
-                  selectedBrand?.image?.url
-                    ? url + selectedBrand.image.url
-                    : "/image/logo.png"
-                }
-                alt=""
-                className="h-16 w-16 rounded-2xl object-cover"
-              />
-              <div>
-                <p className="font-display text-lg font-semibold">
-                  {selectedBrand.companyName || selectedBrand.fullName}
-                </p>
-                <p className="text-sm text-slate-500">{selectedBrand.fullName}</p>
-              </div>
-            </div>
-            <div className="detail-grid">
+          <div className="space-y-5">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <DetailItem label="Contact name" value={selectedBrand.fullName} />
+              <DetailItem label="Company" value={selectedBrand.companyName || "—"} />
               <DetailItem label="Industry" value={selectedBrand.industry || "—"} />
               <DetailItem label="Phone" value={selectedBrand.phoneNumber || "—"} />
-              <DetailItem label="Website" value={selectedBrand.website || "—"} />
               <DetailItem label="Address" value={selectedBrand.address || "—"} />
+              <DetailItem
+                label="Website"
+                value={
+                  selectedBrand.website ? (
+                    <a
+                      href={selectedBrand.website}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-accent hover:underline"
+                    >
+                      {selectedBrand.website}
+                    </a>
+                  ) : (
+                    "—"
+                  )
+                }
+              />
             </div>
-            <div className="detail-item">
-              <div className="label">Company description</div>
+
+            <div className="rounded-2xl border border-slate-100 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                Company description
+              </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-700">
                 {selectedBrand.companyDescription || "No description added."}
               </p>
+            </div>
+
+            {selectedBrand.previousExperience && (
+              <div className="rounded-2xl border border-slate-100 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  Previous experience
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                  {selectedBrand.previousExperience}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+              <Button
+                onClick={() =>
+                  moderate(selectedBrand.id || selectedBrand._id, {
+                    isSuspended: !selectedBrand.isSuspended,
+                  })
+                }
+              >
+                {selectedBrand.isSuspended ? "Unsuspend" : "Suspend"}
+              </Button>
+              <Button
+                danger={!selectedBrand.isBanned}
+                onClick={() =>
+                  moderate(selectedBrand.id || selectedBrand._id, {
+                    isBanned: !selectedBrand.isBanned,
+                  })
+                }
+              >
+                {selectedBrand.isBanned ? "Unban" : "Ban"}
+              </Button>
             </div>
           </div>
         )}

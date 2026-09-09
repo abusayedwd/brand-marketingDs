@@ -8,8 +8,7 @@ import {
   FaMapMarkerAlt,
 } from "react-icons/fa";
 import { useLogedUserQuery } from "../../../redux/features/users/logedUser";
-import url from "../../../redux/api/baseUrl";
-import defaultUser from "../../../../public/image/randomuser.jpg";
+import getMediaUrl, { DEFAULT_AVATAR } from "../../../utils/getMediaUrl";
 
 const Field = ({ icon: Icon, label, value }) => (
   <div className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3">
@@ -40,7 +39,7 @@ const Profile = () => {
     );
   }
 
-  const avatarSrc = user?.image?.url ? `${url}${user.image.url}` : defaultUser;
+  const avatarSrc = getMediaUrl(user?.image, DEFAULT_AVATAR);
 
   return (
     <div className="page-shell space-y-6">

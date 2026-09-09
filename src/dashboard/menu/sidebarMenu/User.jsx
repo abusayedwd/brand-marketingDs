@@ -9,7 +9,7 @@ import {
   YoutubeOutlined,
 } from "@ant-design/icons";
 import DetailsModal, { DetailItem } from "../../../components/DetailsModal";
-import url from "../../../redux/api/baseUrl";
+import getMediaUrl from "../../../utils/getMediaUrl";
 
 const ContentCreatorListPage = () => {
   const { data: contentCreator, isLoading, error, refetch } = useContentCreatorQuery();
@@ -23,6 +23,12 @@ const ContentCreatorListPage = () => {
       await moderateUser({ id, ...body }).unwrap();
       message.success("User updated");
       refetch();
+      if (
+        selectedInfluencer &&
+        (selectedInfluencer.id === id || selectedInfluencer._id === id)
+      ) {
+        setSelectedInfluencer((prev) => ({ ...prev, ...body }));
+      }
     } catch (err) {
       message.error(err?.data?.message || "Moderation failed");
     }
@@ -56,6 +62,12 @@ const ContentCreatorListPage = () => {
     }
   };
 
+  const statusBadge = (row) => {
+    if (row?.isBanned) return "Banned";
+    if (row?.isSuspended) return "Suspended";
+    return "Active";
+  };
+
   const columns = [
     { title: "#", width: 60, render: (_, __, index) => index + 1 },
     {
@@ -64,7 +76,7 @@ const ContentCreatorListPage = () => {
       render: (_, row) => (
         <div className="flex items-center gap-3">
           <img
-            src={row?.image?.url ? url + row.image.url : "/image/logo.png"}
+            src={getMediaUrl(row?.image, "/image/logo.png")}
             alt=""
             className="h-11 w-11 rounded-full object-cover ring-1 ring-slate-200"
           />
@@ -76,7 +88,7 @@ const ContentCreatorListPage = () => {
       ),
     },
     { title: "Email", dataIndex: "email", key: "email" },
-    { title: "Phone", dataIndex: "phoneNumber", key: "phoneNumber" },
+    { title: "Phone", dataIndex: "phoneNumber", key: "phoneNumber", render: (v) => v || "—" },
     {
       title: "Platforms",
       dataIndex: "socialMedia",
@@ -130,14 +142,16 @@ const ContentCreatorListPage = () => {
               setIsModalVisible(true);
             }}
           >
-            View
+            View details
           </Button>
           <Button
             size="small"
             onClick={() =>
               moderate(influencer.id || influencer._id, {
                 isSuspended: !influencer.isSuspended,
-                moderationNote: influencer.isSuspended ? "Suspension lifted" : "Suspended by admin",
+                moderationNote: influencer.isSuspended
+                  ? "Suspension lifted"
+                  : "Suspended by admin",
               })
             }
           >
@@ -155,16 +169,6 @@ const ContentCreatorListPage = () => {
           >
             {influencer.isBanned ? "Unban" : "Ban"}
           </Button>
-          {!influencer.isEmailVerified && (
-            <Button
-              size="small"
-              onClick={() =>
-                moderate(influencer.id || influencer._id, { isEmailVerified: true })
-              }
-            >
-              Verify
-            </Button>
-          )}
         </Space>
       ),
     },
@@ -208,27 +212,18 @@ const ContentCreatorListPage = () => {
         }}
         title={selectedInfluencer?.fullName || "Creator details"}
         subtitle={selectedInfluencer?.email}
-        badge={selectedInfluencer?.isBanned ? "Banned" : selectedInfluencer?.isSuspended ? "Suspended" : "Active"}
+        badge={statusBadge(selectedInfluencer)}
+        avatar={selectedInfluencer?.image}
+        meta={[
+          selectedInfluencer?.userName ? `@${selectedInfluencer.userName}` : null,
+          selectedInfluencer?.subscriptionId?.planName || selectedInfluencer?.planName,
+          selectedInfluencer?.isEmailVerified ? "Verified" : null,
+        ].filter(Boolean)}
       >
         {selectedInfluencer && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <img
-                src={
-                  selectedInfluencer?.image?.url
-                    ? url + selectedInfluencer.image.url
-                    : "/image/logo.png"
-                }
-                alt=""
-                className="h-16 w-16 rounded-full object-cover"
-              />
-              <div>
-                <p className="font-display text-lg font-semibold">{selectedInfluencer.fullName}</p>
-                <p className="text-sm text-slate-500">@{selectedInfluencer.userName || "creator"}</p>
-              </div>
-            </div>
-            <div className="detail-grid">
-              <DetailItem label="Phone" value={selectedInfluencer.phoneNumber} />
+          <div className="space-y-5">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <DetailItem label="Phone" value={selectedInfluencer.phoneNumber || "—"} />
               <DetailItem
                 label="Plan"
                 value={
@@ -237,30 +232,99 @@ const ContentCreatorListPage = () => {
                   "No plan"
                 }
               />
-              <DetailItem
-                label="Interests"
-                value={selectedInfluencer.interests?.join(", ") || "—"}
-              />
               <DetailItem label="Address" value={selectedInfluencer.address || "—"} />
+              <DetailItem
+                label="Completed campaigns"
+                value={selectedInfluencer.completedCampaignsCount ?? "—"}
+              />
             </div>
-            <div className="detail-item">
-              <div className="label">Bio</div>
+
+            <div className="rounded-2xl border border-slate-100 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                Bio
+              </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-700">
                 {selectedInfluencer.bio || "No bio added."}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {(selectedInfluencer.socialMedia || []).map((platform, index) => (
-                <a
-                  key={index}
-                  href={platform.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-ink-800 hover:border-accent"
+
+            {selectedInfluencer.interests?.length > 0 && (
+              <div>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  Interests
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedInfluencer.interests.map((interest) => (
+                    <span
+                      key={interest}
+                      className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-900"
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(selectedInfluencer.socialMedia || []).length > 0 && (
+              <div>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  Social platforms
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {selectedInfluencer.socialMedia.map((platform, index) => (
+                    <a
+                      key={index}
+                      href={platform.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm transition hover:border-teal-200"
+                    >
+                      <span className="inline-flex items-center gap-2 font-semibold text-ink-800">
+                        {renderPlatformIcon(platform.platform)}
+                        {platform.platform}
+                      </span>
+                      <span className="text-slate-500">
+                        {platform.followers || 0} followers
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+              <Button
+                onClick={() =>
+                  moderate(selectedInfluencer.id || selectedInfluencer._id, {
+                    isSuspended: !selectedInfluencer.isSuspended,
+                  })
+                }
+              >
+                {selectedInfluencer.isSuspended ? "Unsuspend" : "Suspend"}
+              </Button>
+              <Button
+                danger={!selectedInfluencer.isBanned}
+                onClick={() =>
+                  moderate(selectedInfluencer.id || selectedInfluencer._id, {
+                    isBanned: !selectedInfluencer.isBanned,
+                  })
+                }
+              >
+                {selectedInfluencer.isBanned ? "Unban" : "Ban"}
+              </Button>
+              {!selectedInfluencer.isEmailVerified && (
+                <Button
+                  type="primary"
+                  onClick={() =>
+                    moderate(selectedInfluencer.id || selectedInfluencer._id, {
+                      isEmailVerified: true,
+                    })
+                  }
                 >
-                  {platform.platform} · {platform.followers || 0}
-                </a>
-              ))}
+                  Verify email
+                </Button>
+              )}
             </div>
           </div>
         )}

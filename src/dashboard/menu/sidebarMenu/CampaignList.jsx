@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Table, Button, Space, Input, Tag } from "antd";
 import { useGetAllCampaignQuery } from "../../../redux/features/campaign/getAllcampaign";
-import url from "./../../../redux/api/baseUrl";
+import getMediaUrl from "../../../utils/getMediaUrl";
 import DetailsModal, { DetailItem } from "../../../components/DetailsModal";
 
 const statusColor = {
@@ -37,7 +37,7 @@ const CampaignListPage = () => {
       render: (name, row) => (
         <div className="flex items-center gap-3">
           <img
-            src={row.image ? url + row.image : "/image/logo.png"}
+            src={getMediaUrl(row.image, "/image/logo.png")}
             alt=""
             className="h-11 w-11 rounded-xl object-cover ring-1 ring-slate-200"
           />
@@ -128,7 +128,7 @@ const CampaignListPage = () => {
           <div className="space-y-4">
             {selectedCampaign.image && (
               <img
-                src={url + selectedCampaign.image}
+                src={getMediaUrl(selectedCampaign.image)}
                 alt="Campaign"
                 className="h-52 w-full rounded-2xl object-cover"
               />

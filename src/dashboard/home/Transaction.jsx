@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Modal } from 'antd';
-import users from '../../../public/image/randomuser.jpg'
+import { DEFAULT_AVATAR } from '../../utils/getMediaUrl'
 import './transaction.css'
 
 import { BsInfoCircle } from 'react-icons/bs';
@@ -111,7 +111,7 @@ const handleView = () => {
       >
       <div>
         <div style={{fontFamily:'Aldrich'}} className="flex justify-center items-center gap-2 flex-col border-b border-b-gray-300">
-          <img className="w-[140px] h-[140px] rounded-full my-4"   src={users} alt="" />
+          <img className="w-[140px] h-[140px] rounded-full my-4"   src={DEFAULT_AVATAR} alt="" />
           <p className="text-[16px] mb-[16px]">absayed</p>
         </div>
         <div style={{fontFamily:'Aldrich'}} className="p-[20px]">

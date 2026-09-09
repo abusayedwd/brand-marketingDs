@@ -7,7 +7,8 @@ const updateAdmin = apiSlice.injectEndpoints({
                 url: `/users/${id}`,
                 method: "PATCH",
                 body: formData
-            })
+            }),
+            invalidatesTags: ["Users", "Profile"],
         })
     })
 })
