@@ -46,14 +46,11 @@ const Sidebar = () => {
     <div className="flex h-full min-h-screen flex-col border-r border-white/5 bg-ink-900 text-white">
       <div className="flex items-center gap-3 px-4 py-6 lg:px-5">
         <img
-          className="h-11 w-11 rounded-xl object-cover ring-2 ring-accent/40"
+          className=" rounded-xl object-cover ring-2 ring-accent/40"
           src={logo}
           alt="Logo"
         />
-        <div className="hidden lg:block">
-          <p className="font-display text-sm font-semibold tracking-wide">InfluencerAd</p>
-          <p className="text-xs text-slate-400">Admin Console</p>
-        </div>
+         
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-2">
